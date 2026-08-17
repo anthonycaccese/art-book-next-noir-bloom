@@ -4,7 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CAROUSEL_SRC="$SCRIPT_DIR/_source-images/carousel"
 LOGOS_SRC="$SCRIPT_DIR/_source-images/logos"
-OUT_BASE="$SCRIPT_DIR/Art Book Next (Noir)"
+OUT_BASE="$SCRIPT_DIR/Art Book Noir"
 
 RESOLUTIONS=("640x480" "720X480" "720x720" "960x720" "1280x720" "1024x768" "480x320")
 HEIGHTS=(480 480 720 720 720 768 320)
@@ -15,29 +15,20 @@ logo_count=0
 for i in "${!RESOLUTIONS[@]}"; do
   res="${RESOLUTIONS[$i]}"
   height="${HEIGHTS[$i]}"
-  selected_dir="$OUT_BASE/$res/selected"
   root_dir="$OUT_BASE/$res"
   logos_dir="$OUT_BASE/$res/logos"
 
-  mkdir -p "$selected_dir" "$logos_dir"
+  mkdir -p "$logos_dir"
 
   echo "Processing $res (height: $height)..."
 
   # Action 1: carousel → selected/ (full opacity, nearest-neighbor)
   for src in "$CAROUSEL_SRC"/*.png; do
     filename="$(basename "$src")"
-    magick "$src" -resize "x${height}" "$selected_dir/$filename"
+    magick "$src" -resize "x${height}" "$root_dir/$filename"
   done
 
-  # Action 2: carousel → root resolution folder (40% opacity, nearest-neighbor)
-  for src in "$CAROUSEL_SRC"/*.png; do
-    filename="$(basename "$src")"
-    magick "$src" -resize "x${height}" \
-      -alpha set -channel Alpha -evaluate multiply 0.4 +channel \
-      "$root_dir/$filename"
-  done
-
-  # Action 3: logos → logos/
+  # Action 2: logos → logos/
   for src in "$LOGOS_SRC"/*.png; do
     filename="$(basename "$src")"
     magick "$src" -resize "x${height}" "$logos_dir/$filename"
